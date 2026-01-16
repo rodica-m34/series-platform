@@ -1,0 +1,1 @@
+Series Platfrom Application that allows interaction with a series platform (like Netflix) from the database offering the following functionalities: adding/editing series and adding/editing users accessing the series platform
