@@ -18,7 +18,7 @@ import java.util.List;
 public class SeriesServiceImpl implements SeriesService {
 
     private final SeriesRepository seriesRepository;
-    Logger LOGGER = LoggerFactory.getLogger(SeriesServiceImpl.class);
+    private static final Logger LOGGER = LoggerFactory.getLogger(SeriesServiceImpl.class);
 
     public SeriesServiceImpl(SeriesRepository seriesRepository) {
         this.seriesRepository = seriesRepository;
@@ -63,7 +63,7 @@ public class SeriesServiceImpl implements SeriesService {
     public List<SeriesDTO> getByCategory(CategoryType categoryType) {
         List<Series> allSeriesEntities = seriesRepository.findByCategoryType(categoryType);
         if (allSeriesEntities.isEmpty()) {
-            LOGGER.warn("Currently there are no series found for the category: " + categoryType);
+            LOGGER.warn("Currently there are no series found for the category: {}", categoryType);
             return Collections.emptyList();
         }
 
@@ -76,7 +76,7 @@ public class SeriesServiceImpl implements SeriesService {
     public List<SeriesDTO> findSeriesByName (String name){
         List<Series> allSeriesEntities = seriesRepository.findSeriesByNameContainingIgnoreCase(name);
         if (allSeriesEntities.isEmpty()) {
-            LOGGER.warn("Currently there are no series found with this name: " + name);
+            LOGGER.warn("Currently there are no series found with this name: {}", name);
             return Collections.emptyList();
         }
         return allSeriesEntities.stream()

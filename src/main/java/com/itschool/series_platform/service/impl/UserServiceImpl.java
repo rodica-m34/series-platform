@@ -13,7 +13,9 @@ import com.itschool.series_platform.service.UserService;
 import com.itschool.series_platform.utils.ModelConverter;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
+import org.springframework.web.server.ResponseStatusException;
 
 import java.util.Collections;
 import java.util.List;
@@ -27,6 +29,7 @@ public class UserServiceImpl implements UserService {
 
     private final UserRepository userRepository;
     private final SeriesRepository seriesRepository;
+    private static final Logger LOGGER = LoggerFactory.getLogger(UserServiceImpl.class);
 
     public UserServiceImpl(UserRepository userRepository, SeriesRepository seriesRepository) {
         this.userRepository = userRepository;
@@ -91,8 +94,11 @@ public class UserServiceImpl implements UserService {
 
             return userSeries.stream().map(ModelConverter::toSeriesDTO).toList();
 
-        } catch (ExecutionException | InterruptedException e) {
-            throw new RuntimeException(e);
+        } catch (ExecutionException e) {
+            throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, "Error occurred while executing the task that adds to favorites list", e);
+        } catch (InterruptedException e) {
+            Thread.currentThread().interrupt();
+            throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, "InterruptedException occurred in current thread", e);
         }
     }
 
@@ -103,8 +109,7 @@ public class UserServiceImpl implements UserService {
         List <Series> userSeries = user.getSeries();
 
         if (userSeries.isEmpty()) {
-            Logger LOGGER = LoggerFactory.getLogger(UserServiceImpl.class);
-            LOGGER.warn("Currently there are no series in favorite list for user: " + user.getName());
+            LOGGER.warn("Currently there are no series in favorite list for user: {}", user.getName());
             return Collections.emptyList();
         }
 

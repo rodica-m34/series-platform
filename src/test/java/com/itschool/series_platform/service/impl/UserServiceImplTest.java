@@ -50,6 +50,7 @@ class UserServiceImplTest {
     void addToFavoriteList()
     {
         //test to run for the method when executor is removed from UserServiceImpl::addToFavoriteList()
+
         Series seriesEntity = new Series(NAME, NO_OF_SEASONS, CATEGORY_TYPE);
         seriesEntity.setId(ID_SERIES);
         Mockito.when(seriesRepository.findById(ID_SERIES)).thenReturn(Optional.of(seriesEntity));
