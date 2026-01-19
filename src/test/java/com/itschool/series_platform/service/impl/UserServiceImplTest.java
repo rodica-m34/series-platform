@@ -6,7 +6,6 @@ import com.itschool.series_platform.entity.User;
 import com.itschool.series_platform.model.SeriesDTO;
 import com.itschool.series_platform.repository.SeriesRepository;
 import com.itschool.series_platform.repository.UserRepository;
-import com.itschool.series_platform.service.SeriesService;
 import com.itschool.series_platform.service.UserService;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -40,7 +39,6 @@ class UserServiceImplTest {
     @Mock
     private UserRepository userRepository;
 
-    private SeriesService seriesService;
     private UserService userService;
 
     @BeforeEach
@@ -51,6 +49,7 @@ class UserServiceImplTest {
     @Test
     void addToFavoriteList()
     {
+        //test to run for the method when executor is removed from UserServiceImpl::addToFavoriteList()
         Series seriesEntity = new Series(NAME, NO_OF_SEASONS, CATEGORY_TYPE);
         seriesEntity.setId(ID_SERIES);
         Mockito.when(seriesRepository.findById(ID_SERIES)).thenReturn(Optional.of(seriesEntity));

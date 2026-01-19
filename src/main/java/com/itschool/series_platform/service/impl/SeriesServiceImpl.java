@@ -27,8 +27,8 @@ public class SeriesServiceImpl implements SeriesService {
     @Override
     public SeriesDTO createSeries(SeriesDTO seriesDTO) {
         Series seriesEntity = ModelConverter.toSeriesEntity(seriesDTO);
-        seriesRepository.save(seriesEntity);
-        return ModelConverter.toSeriesDTO(seriesEntity);
+        Series createdSeries = seriesRepository.save(seriesEntity);
+        return ModelConverter.toSeriesDTO(createdSeries);
     }
 
     @Override

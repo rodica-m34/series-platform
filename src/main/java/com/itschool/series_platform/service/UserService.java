@@ -4,7 +4,6 @@ import com.itschool.series_platform.model.SeriesDTO;
 import com.itschool.series_platform.model.UserDTO;
 
 import java.util.List;
-import java.util.concurrent.ExecutionException;
 
 public interface UserService {
 

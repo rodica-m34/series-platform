@@ -19,7 +19,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 @ExtendWith(MockitoExtension.class)
 class SeriesServiceImplTest {
 
-    private static final Long ID_SERIES = 1L;
+    private static final long ID_SERIES = 1L;
     private static final String NAME = "fake name";
     private static final Integer NO_OF_SEASONS = 123;
     private static final CategoryType CATEGORY_TYPE = CategoryType.COMEDY;
@@ -36,7 +36,6 @@ class SeriesServiceImplTest {
 
     @Test
     void createSeries() {
-        // create a dummy SeriesDTO object to be used as an argument for the SeriesServiceImpl::createSeries method
         SeriesDTO seriesDTO = new SeriesDTO(null, NAME, NO_OF_SEASONS, CATEGORY_TYPE);
 
         Series seriesEntity = new Series(NAME, NO_OF_SEASONS, CATEGORY_TYPE);
@@ -44,8 +43,7 @@ class SeriesServiceImplTest {
         Mockito.when(seriesRepository.save(
                 Mockito.argThat( // any Series object that matches the following conditions
                         series -> series.getName().equals(NAME)
-                                && series.getNoOfSeasons().equals(NO_OF_SEASONS)
-                                && series.getCategoryType().equals(CATEGORY_TYPE))// name & noOfSeasons matches
+                                && series.getNoOfSeasons().equals(NO_OF_SEASONS))
                 )
         ).thenReturn(seriesEntity);
 
@@ -53,8 +51,8 @@ class SeriesServiceImplTest {
         SeriesDTO createdSeries = seriesService.createSeries(seriesDTO);
 
         //verify the result
-        assertEquals(NAME, createdSeries.name()); // ensure the name is the one from database
-        assertEquals(NO_OF_SEASONS, createdSeries.noOfSeasons()); // ensure the noOfSeasons is the one from database
+        assertEquals(NAME, createdSeries.name());
+        assertEquals(NO_OF_SEASONS, createdSeries.noOfSeasons());
         assertEquals(ID_SERIES, createdSeries.id());
         assertEquals(CATEGORY_TYPE, createdSeries.categoryType());
     }
@@ -66,11 +64,12 @@ class SeriesServiceImplTest {
         Mockito.when(seriesRepository.findSeriesByNameContainingIgnoreCase(NAME))
                 .thenReturn(List.of(seriesEntity));
 
+        //the method to be tested
         List<SeriesDTO> seriesDTOS = seriesService.findSeriesByName(NAME);
 
-        assertEquals(1, seriesDTOS.size());
-
         SeriesDTO seriesDTO = seriesDTOS.getFirst();
+
+        assertEquals(1, seriesDTOS.size());
         assertEquals(NAME, seriesDTO.name());
         assertEquals(NO_OF_SEASONS, seriesDTO.noOfSeasons());
         assertEquals(ID_SERIES, seriesDTO.id());

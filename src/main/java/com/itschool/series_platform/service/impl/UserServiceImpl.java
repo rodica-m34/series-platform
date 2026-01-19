@@ -121,7 +121,7 @@ public class UserServiceImpl implements UserService {
         Series series = seriesRepository.findById(idSeries)
                 .orElseThrow(() -> new SeriesNotFoundException("Series " + idSeries + " not found in db!"));
 
-        //get user's associated list of series
+        //get user's list of series
         List <Series> userSeries = user.getSeries();
         if (!userSeries.contains(series)){
             throw new SeriesNotFoundException("Series " + idSeries + " is not in user's favorite list");

@@ -21,7 +21,7 @@ public class SeriesController {
     }
 
     @Operation(summary = "Add a new series", description = "Add a new series to the database and return the created series. " +
-            "Add category from this list: comedy, drama, thriller, SF or children_series")
+            "Add category only from this list: comedy, drama, thriller, SF or children_series")
     @PostMapping
     public SeriesDTO createSeries(@RequestBody SeriesDTO seriesDTO) {
         return seriesService.createSeries(seriesDTO);
