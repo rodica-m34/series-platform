@@ -14,18 +14,20 @@ public class Series {
     private String name;
     private Integer noOfSeasons;
 
-    @ManyToOne
-    private Category category;
+    @Enumerated(EnumType.STRING)
+    @Column(name = "category_type")
+    private CategoryType categoryType;
 
-    @ManyToMany(mappedBy = "series")
+    @ManyToMany(mappedBy = "series", fetch = FetchType.EAGER)
     private List<User> users;
 
     protected Series() {
     }
 
-    public Series(String name, Integer noOfSeasons) {
+    public Series(String name, Integer noOfSeasons,  CategoryType categoryType) {
         this.name = name;
         this.noOfSeasons = noOfSeasons;
+        this.categoryType = categoryType;
     }
 
     public long getId() {
@@ -52,19 +54,19 @@ public class Series {
         this.noOfSeasons = noOfSeasons;
     }
 
-    public Category getCategory() {
-        return category;
-    }
-
-    public void setCategory(Category category) {
-        this.category = category;
-    }
-
     public List<User> getUsers() {
         return users;
     }
 
     public void setUsers(List<User> users) {
         this.users = users;
+    }
+
+    public CategoryType getCategoryType() {
+        return categoryType;
+    }
+
+    public void setCategoryType(CategoryType categoryType) {
+        this.categoryType = categoryType;
     }
 }

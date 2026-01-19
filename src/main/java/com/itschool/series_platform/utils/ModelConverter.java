@@ -1,8 +1,6 @@
 package com.itschool.series_platform.utils;
 
-import com.itschool.series_platform.entity.Category;
 import com.itschool.series_platform.entity.User;
-import com.itschool.series_platform.model.CategoryDTO;
 import com.itschool.series_platform.model.SeriesDTO;
 import com.itschool.series_platform.entity.Series;
 import com.itschool.series_platform.model.UserDTO;
@@ -17,33 +15,16 @@ public class ModelConverter {
 
     public static SeriesDTO toSeriesDTO(Series seriesEntity) {
 
-        Category categoryEntity = seriesEntity.getCategory();
-        CategoryDTO categoryDTO = toCategoryDTO (categoryEntity);
-
         return Optional.ofNullable(seriesEntity)
-                .map(series -> new SeriesDTO(series.getId(), series.getName(), series.getNoOfSeasons(), categoryDTO))
+                .map(series -> new SeriesDTO(series.getId(), series.getName(), series.getNoOfSeasons(), series.getCategoryType()))
                 .orElse(null);
     }
 
     public static Series toSeriesEntity(SeriesDTO  seriesDTO) {
-        CategoryDTO categoryDTO = seriesDTO.category();
 
         return Optional.ofNullable(seriesDTO)
-                .map(series -> new Series(series.name(), series.noOfSeasons()))
+                .map(series -> new Series(series.name(), series.noOfSeasons(), series.categoryType()))
                 .orElse(null);
-    }
-
-    private static CategoryDTO toCategoryDTO(Category categoryEntity) {
-        return Optional.ofNullable(categoryEntity)
-                .map(category -> new CategoryDTO(category.getId(), category.getName()))
-                .orElse(null);
-    }
-
-    private static Category toCategoryEntity(CategoryDTO categoryDTO) {
-        return Optional.ofNullable(categoryDTO)
-                .map(category -> new Category( category.name()))
-                .orElse(null);
-
     }
 
     public static UserDTO toUserDTO(User userEntity) {

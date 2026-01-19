@@ -38,7 +38,6 @@ public class UserController {
         return userService.addToFavoriteList(idSeries, idUser);
     }
 
-
     @Operation (summary = "Find user's list of series", description = "Find all series in user's favorite list and return them in a list")
     @GetMapping("{idUser}")
     public List<SeriesDTO> getFavoriteList (@PathVariable long idUser){

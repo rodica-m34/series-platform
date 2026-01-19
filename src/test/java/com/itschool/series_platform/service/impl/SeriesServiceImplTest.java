@@ -1,10 +1,8 @@
 package com.itschool.series_platform.service.impl;
 
-import com.itschool.series_platform.entity.Category;
+import com.itschool.series_platform.entity.CategoryType;
 import com.itschool.series_platform.entity.Series;
-import com.itschool.series_platform.model.CategoryDTO;
 import com.itschool.series_platform.model.SeriesDTO;
-import com.itschool.series_platform.repository.CategoryRepository;
 import com.itschool.series_platform.repository.SeriesRepository;
 import com.itschool.series_platform.service.SeriesService;
 import org.junit.jupiter.api.BeforeEach;
@@ -14,49 +12,40 @@ import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.junit.jupiter.MockitoExtension;
 
-import java.util.Optional;
+import java.util.List;
 
-import static org.junit.jupiter.api.Assertions.*;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 
 @ExtendWith(MockitoExtension.class)
 class SeriesServiceImplTest {
 
-    private static final Long idCategory = 1L;
-    private static final Long idSeries = 1L;
-
-    private static final String name = "fake name";
-    private static final Integer noOfSeasons = 123;
+    private static final Long ID_SERIES = 1L;
+    private static final String NAME = "fake name";
+    private static final Integer NO_OF_SEASONS = 123;
+    private static final CategoryType CATEGORY_TYPE = CategoryType.COMEDY;
 
     @Mock
     private SeriesRepository seriesRepository;
-
-    @Mock
-    private CategoryRepository categoryRepository;
-
-    @Mock
-    private Category category;
 
     private SeriesService seriesService;
 
     @BeforeEach
     void setUp() {
-        seriesService = new SeriesServiceImpl(seriesRepository, categoryRepository);
+        seriesService = new SeriesServiceImpl(seriesRepository);
     }
 
     @Test
     void createSeries() {
         // create a dummy SeriesDTO object to be used as an argument for the SeriesServiceImpl::createSeries method
-        CategoryDTO categoryDTO = new CategoryDTO(idCategory, null);
-        SeriesDTO seriesDTO = new SeriesDTO(null, name, noOfSeasons, categoryDTO);
+        SeriesDTO seriesDTO = new SeriesDTO(null, NAME, NO_OF_SEASONS, CATEGORY_TYPE);
 
-        Mockito.when(categoryRepository.findById(idCategory)) // when categoryRepository.findById is called with idCategory
-                .thenReturn(Optional.of(category)); // then return a mocked category instead of hitting the database; a Category object is needed for creating a Series object
-
-        Series seriesEntity = new Series(name,noOfSeasons);
-        seriesEntity.setId(idSeries);
+        Series seriesEntity = new Series(NAME, NO_OF_SEASONS, CATEGORY_TYPE);
+        seriesEntity.setId(ID_SERIES);
         Mockito.when(seriesRepository.save(
                 Mockito.argThat( // any Series object that matches the following conditions
-                        series -> series.getName().equals(name) && series.getNoOfSeasons().equals(noOfSeasons))// name & noOfSeasons matches
+                        series -> series.getName().equals(NAME)
+                                && series.getNoOfSeasons().equals(NO_OF_SEASONS)
+                                && series.getCategoryType().equals(CATEGORY_TYPE))// name & noOfSeasons matches
                 )
         ).thenReturn(seriesEntity);
 
@@ -64,9 +53,27 @@ class SeriesServiceImplTest {
         SeriesDTO createdSeries = seriesService.createSeries(seriesDTO);
 
         //verify the result
-        assertEquals(name, createdSeries.name()); // ensure the name is the one from database
-        assertEquals(noOfSeasons, createdSeries.noOfSeasons()); // ensure the noOfSeasons is the one from database
-        assertEquals(idSeries, createdSeries.id()); // check if the created order received the expected ID extracted from database
+        assertEquals(NAME, createdSeries.name()); // ensure the name is the one from database
+        assertEquals(NO_OF_SEASONS, createdSeries.noOfSeasons()); // ensure the noOfSeasons is the one from database
+        assertEquals(ID_SERIES, createdSeries.id());
+        assertEquals(CATEGORY_TYPE, createdSeries.categoryType());
+    }
 
+    @Test
+    void findSeriesByName() {
+        Series seriesEntity = new Series(NAME, NO_OF_SEASONS, CATEGORY_TYPE);
+        seriesEntity.setId(ID_SERIES);
+        Mockito.when(seriesRepository.findSeriesByNameContainingIgnoreCase(NAME))
+                .thenReturn(List.of(seriesEntity));
+
+        List<SeriesDTO> seriesDTOS = seriesService.findSeriesByName(NAME);
+
+        assertEquals(1, seriesDTOS.size());
+
+        SeriesDTO seriesDTO = seriesDTOS.getFirst();
+        assertEquals(NAME, seriesDTO.name());
+        assertEquals(NO_OF_SEASONS, seriesDTO.noOfSeasons());
+        assertEquals(ID_SERIES, seriesDTO.id());
+        assertEquals(CATEGORY_TYPE, seriesDTO.categoryType());
     }
 }

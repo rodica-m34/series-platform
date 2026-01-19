@@ -8,11 +8,19 @@ import com.itschool.series_platform.model.SeriesDTO;
 import com.itschool.series_platform.model.UserDTO;
 import com.itschool.series_platform.repository.SeriesRepository;
 import com.itschool.series_platform.repository.UserRepository;
+import com.itschool.series_platform.service.SeriesService;
 import com.itschool.series_platform.service.UserService;
 import com.itschool.series_platform.utils.ModelConverter;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 
+import java.util.Collections;
 import java.util.List;
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.concurrent.Future;
 
 @Service
 public class UserServiceImpl implements UserService {
@@ -30,7 +38,7 @@ public class UserServiceImpl implements UserService {
         User userEntity = ModelConverter.toUserEntity(newUserDTO);
 
         // save the new User entity in the database
-        User createdUserEntity = userRepository.save(userEntity); // since the provided User entity does not have an ID, it will CREATE a new record in the database
+        User createdUserEntity = userRepository.save(userEntity);
 
         return ModelConverter.toUserDTO(createdUserEntity);
     }
@@ -52,28 +60,40 @@ public class UserServiceImpl implements UserService {
 
     @Override
     public void deleteUser(long id) {
-        if (userRepository.findById(id).isEmpty()) { //in case a user with that id does not exist
+        if (userRepository.findById(id).isEmpty()) {
             throw new UserNotFoundException("User " + id + " does not exist in db!");
         }
         userRepository.deleteById(id);
     }
 
     @Override
-    public List<SeriesDTO> addToFavoriteList(long idSeries, long idUser) {
+    public List<SeriesDTO> addToFavoriteList(long idSeries, long idUser)  {
 
-        //searches in series DB for idSeries
-        Series series = seriesRepository.findById(idSeries)
-                .orElseThrow(() -> new SeriesNotFoundException("Series " + idSeries + " not found in db!"));
-        //searches in user DB for idUser
-        User user = userRepository.findById(idUser)
-                .orElseThrow(() -> new UserNotFoundException("User " + idUser + " not found in db!"));
-        //adds to users' list of series
-        List<Series> userSeries = user.getSeries();
-        userSeries.add(series);
-        //save in DB
-        userRepository.save(user);
+        try (ExecutorService executorService = Executors.newVirtualThreadPerTaskExecutor()) {
+            //searches in series DB for idSeries
+            Future<Series> seriesFuture = executorService.submit(() -> {
+                    return seriesRepository.findById(idSeries)
+                            .orElseThrow(() -> new SeriesNotFoundException("Series " + idSeries + " not found in db!"));
+            });
+            //searches in user DB for idUser
+            Future<User> userFuture = executorService.submit(() ->{
+                    return userRepository.findById(idUser)
+                            .orElseThrow(() -> new UserNotFoundException("User " + idUser + " not found in db!"));
+            });
+            User user = userFuture.get();
+            Series series = seriesFuture.get();
 
-        return userSeries.stream().map(ModelConverter::toSeriesDTO).toList();
+            //adds to users' list of series
+            List<Series> userSeries = user.getSeries();
+            userSeries.add(series);
+            //save in DB
+            userRepository.save(user);
+
+            return userSeries.stream().map(ModelConverter::toSeriesDTO).toList();
+
+        } catch (ExecutionException | InterruptedException e) {
+            throw new RuntimeException(e);
+        }
     }
 
     @Override
@@ -81,6 +101,12 @@ public class UserServiceImpl implements UserService {
         User user = userRepository.findById(id)
                 .orElseThrow(() -> new UserNotFoundException("User " + id + " not found in db!"));
         List <Series> userSeries = user.getSeries();
+
+        if (userSeries.isEmpty()) {
+            Logger LOGGER = LoggerFactory.getLogger(UserServiceImpl.class);
+            LOGGER.warn("Currently there are no series in favorite list for user: " + user.getName());
+            return Collections.emptyList();
+        }
 
         return userSeries.stream()
                 .map(ModelConverter::toSeriesDTO).toList();

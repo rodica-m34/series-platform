@@ -16,10 +16,11 @@ public class User {
     private Integer age;
     private String password;
 
-    @ManyToMany
+    @ManyToMany(fetch = FetchType.EAGER)
     @JoinTable(name = "users_favorites",
                 joinColumns = @JoinColumn(name = "user_id"),
-                inverseJoinColumns = @JoinColumn(name = "series_id"))
+                inverseJoinColumns = @JoinColumn(name = "series_id")
+    )
     private List<Series> series;
 
     protected User(){}
@@ -79,6 +80,4 @@ public class User {
     public void setSeries(List<Series> series) {
         this.series = series;
     }
-
-
 }
